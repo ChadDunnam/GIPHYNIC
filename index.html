@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Cagey API</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    	
+    </head>
+
+<body>
+    <body background="https://s3-us-west-2.amazonaws.com/flx-editorial-wordpress/wp-content/uploads/2018/09/11112210/Nic-Cage-Vampires-Kiss.jpg">
+    <div class='container'>
+        <div class='row'>
+            <div id='cageyButtons'>
+            </div>
+        </div>
+        <form>
+            <div class="row">
+                <div class="col-md-3">
+                    <input type="text" id="newCage" class="form">
+                </div>
+                    <input id="addCage" type="submit" class="btn btn-danger" value="Submit for more Nic Cage movies!">
+                </div>
+            </form>
+
+    <div id="ratings"></div>
+
+    <script type="text/javascript">
+    
+    // topic array to hold Nic Cage movies
+	var topics = ["Ghost Rider", "Leaving Las Vegas", "City of Angels", "Drive Angry", "Moonstruck", "Matchstick Men", "Vampire's Kiss", "Trespass"];
+    var cageyGif = "";
+
+    // funtion to just display the buttons from the array
+    function displayButtons () {
+    $("#cageyButtons").empty();
+    $("#newCage").val("");
+    for (var i = 0; i < topics.length; i++) {
+        var button = $("<button class='btn btn-success'>");
+        button.addClass("cagey");
+        button.attr("movie", topics[i]);
+        button.text(topics[i]);
+        $("#cageyButtons").append(button);
+        $("#cageyButtons").append(" ");
+    };
+};
+displayButtons();
+
+    //on click a new button will be added
+$("#addCage").on("click", function(event) {
+    event.preventDefault();
+    var newMovie = $("#newCage").val().trim();
+    var cageMovieInput = $(this).attr("movie");
+    var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + newMovie + "&api_key=N5OKJJ5Kx7gKlaYEZha1x3zZvZli3Wwd&limit=10";
+        $.ajax({ url: queryURL, method: "GET"}).done(function(response) {
+            if (response.pagination.total_count >= 10) {
+                topics.push(newMovie);
+                displayButtons(); }
+                });
+});
+$(document).on("click", ".cagey", display);
+function display() {
+var cageMovieInput = $(this).attr("movie");
+
+    var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + cageMovieInput + "&api_key=N5OKJJ5Kx7gKlaYEZha1x3zZvZli3Wwd&limit=10";
+        $.ajax({ url: queryURL, method: "GET"}).done(function(response) {
+        // for loop to go the length (10) and get gifs
+        for (var j = 0; j < response.data.length; j++) {
+            // variables for active and still images
+            var active = response.data[j].images.fixed_width.url;
+            var still = response.data[j].images.fixed_width_still.url;
+            var rating = "Rating: " + (response.data[j].rating).toUpperCase();
+            // creates new image
+            var cageyGif = $("<img>");;
+            // sets rating color
+            $("#ratings").css("color", "blue");
+            // creates div for rating and with font specs and size
+            var ratingsDiv = $("<div id='ratingDiv'>" + rating + "</div>");
+            $(ratingsDiv).css({"text-align":"right",  "font-size":"25px", "width":"150", "display":"block"});
+            cageyGif.attr({"active":active, "still":still, "src":still, "state":"still"});
+            // create variable and hold both image and rating
+            var ratingAndImage = $("<div>");
+            $(ratingAndImage).css({"float":"left"});
+            $(ratingAndImage).prepend(ratingsDiv, cageyGif);
+            
+            $("#ratings").prepend(ratingAndImage);
+            // function to start and stop the Gifs from our still and active variables
+            $(cageyGif).on("click", function(event) {
+                var state = $(this).attr("state");
+                var source = $(this).attr("src");
+                if (state === "still") {
+                $(this).attr("src", $(this).attr("active"));
+                $(this).attr("state", "active"); }
+                else {
+                $(this).attr("src", $(this).attr("still"));
+                $(this).attr("state", "still"); }
+                });
+            }
+        });
+ };
+</script>
+</body>
+</html>
